@@ -36,7 +36,7 @@ $ table --demo p --output demo.md
 
 This script can load JSON and python files.
 
-(###JSON)
+### JSON
 
 The following shows an example of a valid json file:
 
@@ -131,7 +131,7 @@ So if you're planning on using a python file instead, note that the script expec
     - **LIB** Lower is better, or
     - **HIB** Higher is better.
 
-The previous example would produce the same output as the [JSON](#JSON) example.
+The previous example would produce the same output as the JSON example.
 
 ## Usage
 
