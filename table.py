@@ -11,6 +11,7 @@ import ast
 
 import click
 
+#: Demo data set 1
 PERFORMANCE = (
     "Performance in requests per second",
     ["Computer", "LPOP", "SADD", "LPUSH", "GET", "SET"],
@@ -23,6 +24,7 @@ PERFORMANCE = (
     "HIB"
 )
 
+#: Demo data set 2
 TIME = (
     "Time of excecution in seconds",
     ["Computer", "mafft", "mrbayes", "build-mplayer", "build-php",
@@ -76,11 +78,11 @@ class BenchmarkTable:
             writer(f"| {k} {('| %.2f ' * len(v)) % tuple(v)} |")
 
     def compared_to(self, ref_machine: str) -> Dict[str, List[float]]:
-        """Returns a normalized version of :data:`RESULTS` with respect to a
+        """Returns a normalized version of :data:`self.data` with respect to a
         given machine
 
         Args:
-            ref_machine: the machine we use to normalize the :data:`RESULTS`
+            ref_machine: the machine we use to normalize the :data:`self.data`
 
         Returns:
             A dictionary that maps computers to the list of their normalized
@@ -102,7 +104,7 @@ class BenchmarkTable:
         return result
 
     def print_markdown(self, output: io.IOBase = None):
-        """Prints markdown tables with the comparison of all machines relative to each
+        """Prints markdown tables with that compare all the machines relative to each
         other."""
         # Set output
         writer = compose(output.write, lambda s: s + "\n") if output else print
@@ -175,6 +177,11 @@ class BenchmarkTable:
 
     @staticmethod
     def validate_data_set(data_set):
+        """Validates a given data set.
+
+        Args:
+            data: a data set of the form (title, headers, data, data_type).
+        """
         _, headers, data, data_type = data_set
         first = list(data.keys())[0]
         if len(headers) - 1 != len(data[first]):
@@ -207,12 +214,26 @@ def geo_mean(data: List[float]):
 
 
 def valid_file(ctx, param, value):
+    """Callback function for the "--load" option.
+
+    Args:
+        ctx:   the application's context.
+        param: "--load".
+        value: the value assigned to this option.
+    """
     if value is not None and not value.endswith((".py", ".json", ".JSON")):
         raise click.BadParameter('Should be a .py or .json file')
     return value
 
 
 def valid_demo(ctx, param, value):
+    """Callback function for the "--demo" option.
+
+    Args:
+        ctx:   the application's context.
+        param: "--demo".
+        value: the value assigned to this option.
+    """
     if value is not None and value not in ["p", "t"]:
         raise click.BadParameter('Should be either "t" for the time demo,' +
                                  ' or "p" for the performance demo')
@@ -229,6 +250,19 @@ def valid_demo(ctx, param, value):
 @click.option('--output', default=None,
               help='saves output to the specified file')
 def cli(demo: str, load: str, new: bool, output: str):
+    """Click application
+
+    Args:
+        demo:   What the user passed with the --demo flag. Used for selecting
+                a demo accepts "p" or "t".
+        load:   What the user passed with the --load flag. Used to specify if
+                a python or json file should be loaded.
+        new:    What the user passed with the --new flag. Used to specify if
+                the user wants to a new table, this parameter would then be
+                this new data set's title.
+        output: What the user passed with the --output flag. Used to specify
+                if and to which file the output should be saved.
+    """
     benchmark = BenchmarkTable(demo, load, new)
     if output:
         with open(output, 'w') as output_file:
