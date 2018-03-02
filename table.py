@@ -240,13 +240,26 @@ class BenchmarkTable:
 
 
 def compose(*functions):
+    """Function composition
+
+    Args:
+        functions: the functions to be composed.
+
+    Returns:
+        the composed function.
+    """
     def compose2(f, g):
         return lambda x: f(g(x))
-
     return functools.reduce(compose2, functions, lambda x: x)
 
 
 def error(message: str):
+    """Prints a descriptive message, then exits the program with exit code 1.
+
+    Args:
+        message: A descriptive message that explains the error.
+
+    """
     print(message)
     exit(1)
 
@@ -255,8 +268,7 @@ def geo_mean(data: List[float]):
     """Gets the geometric mean of a list of floats.
 
     Args:
-        data:
-            the list of floats.
+        data: the list of floats.
     """
     return math.pow(functools.reduce(operator.mul, data), 1 / len(data))
 
