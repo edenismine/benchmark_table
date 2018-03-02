@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-# pylint: disable=E1120
 import ast
 import functools
 import json
@@ -10,31 +9,25 @@ from typing import Dict, List, TextIO, Optional
 import click
 
 #: Demo data set 1
-PERFORMANCE = (
-    "Performance in requests per second",
-    ["Computer", "LPOP", "SADD", "LPUSH", "GET", "SET"],
-    {
-        "A": [415742.52, 342444.95, 306472, 416612.54, 322154.33],
-        "B": [1253954.38, 958227.51, 925685.69, 1202972.44, 884748.25],
-        "C": [1365233.67, 1017367.58, 963456.75, 1159709.04, 916889.68],
-        "D": [415742.52, 342494.98, 306477.42, 416612.54, 322154.54]
-    },
-    "HIB"
-)
+PERFORMANCE = ("Performance in requests per second", [
+    "Computer", "LPOP", "SADD", "LPUSH", "GET", "SET"
+], {
+    "A": [415742.52, 342444.95, 306472, 416612.54, 322154.33],
+    "B": [1253954.38, 958227.51, 925685.69, 1202972.44, 884748.25],
+    "C": [1365233.67, 1017367.58, 963456.75, 1159709.04, 916889.68],
+    "D": [415742.52, 342494.98, 306477.42, 416612.54, 322154.54]
+}, "HIB")
 
 #: Demo data set 2
-TIME = (
-    "Time of execution in seconds",
-    ["Computer", "mafft", "mrbayes", "build-mplayer", "build-php",
-     "compress-gzip", "dcraw", "encode-flac", "gnupg"],
-    {
-        "A": [18.95, 42.51, 163.14, 87.3, 22.06, 109.64, 13.86, 14.79],
-        "B": [20.81, 49.69, 287.17, 461.28, 19.47, 92.81, 10.68, 28.27],
-        "C": [15.2, 800.96, 3.89, 289.57, 16.69, 76.23, 9.34, 17.34],
-        "D": [37.45, 50.81, 751.93, 757.42, 33.53, 100.75, 29.2, 15.32]
-    },
-    "LIB"
-)
+TIME = ("Time of execution in seconds", [
+    "Computer", "mafft", "mrbayes", "build-mplayer", "build-php",
+    "compress-gzip", "dcraw", "encode-flac", "gnupg"
+], {
+    "A": [18.95, 42.51, 163.14, 87.3, 22.06, 109.64, 13.86, 14.79],
+    "B": [20.81, 49.69, 287.17, 461.28, 19.47, 92.81, 10.68, 28.27],
+    "C": [15.2, 800.96, 3.89, 289.57, 16.69, 76.23, 9.34, 17.34],
+    "D": [37.45, 50.81, 751.93, 757.42, 33.53, 100.75, 29.2, 15.32]
+}, "LIB")
 
 
 class BenchmarkTable:
@@ -43,14 +36,10 @@ class BenchmarkTable:
     Wraps a data set composed of benchmarking scores.
 
     Attributes:
-        title:
-            The title of the table.
-        headers:
-            The column headers of the table.
-        data:
-            The benchmarking data.
-        type:
-            The data set type, either LIB or HIB.
+        title: The title of the table.
+        headers: The column headers of the table.
+        data: The benchmarking data.
+        type: The data set type, either LIB or HIB.
 
     """
 
@@ -96,15 +85,14 @@ class BenchmarkTable:
         BenchmarkTable.validate_data_set(data_set)
         self.title, self.headers, self.data, self.type = data_set
 
-    def print_table(self, items: Dict[str, List[float]],
+    def print_table(self,
+                    items: Dict[str, List[float]],
                     output: Optional[TextIO] = None):
         """Prints the data set as a markdown table.
 
         Args:
-            items:
-                The data set that should be converted to a markdown table.
-            output:
-                Optional output file.
+            items: The data set that should be converted to a markdown table.
+            output: Optional output file.
         """
         # Set output to either stdout or the output file if there is one
         writer = compose(output.write, lambda s: s + "\n") if output else print
@@ -145,8 +133,7 @@ class BenchmarkTable:
         relative to each other.
 
         Args:
-            output:
-                Optional output file.
+            output: Optional output file.
 
         """
         # Set output to either stdout or the output file if there is one
@@ -175,8 +162,10 @@ class BenchmarkTable:
                    "order, we have that:\n")
 
             # Sort results
-            geo_means = {comp: geo_mean(normals) for comp, normals in
-                         compared_to_ref_machine.items()}
+            geo_means = {
+                comp: geo_mean(normals)
+                for comp, normals in compared_to_ref_machine.items()
+            }
             geo_means = sorted(geo_means.items(), key=operator.itemgetter(1))
 
             # Print results
@@ -184,10 +173,8 @@ class BenchmarkTable:
             for computer, mean in geo_means:
                 if computer != ref_machine:
                     adj = "fast" if self.type == "LIB" else "powerful"
-                    result = (
-                            f"- Computer {computer} is {mean:.2f} times" +
-                            f" as {adj} as computer {ref_machine}."
-                    )
+                    result = (f"- Computer {computer} is {mean:.2f} times" +
+                              f" as {adj} as computer {ref_machine}.")
                     results.append(result)
             writer(str.join('\n', results))
 
@@ -196,8 +183,7 @@ class BenchmarkTable:
         """Creates a usable data set from user input
 
         Args:
-            title:
-                Defaults to None. The data set's description.
+            title: Defaults to None. The data set's description.
 
         Returns:
             A data set tuple (title, headers, data, data_type).
@@ -216,7 +202,8 @@ class BenchmarkTable:
             letter = chr(i + 65)
             data[letter] = [
                 float(input(f"Machine {letter}'s result in test {test}: "))
-                for test in headers[1:]]
+                for test in headers[1:]
+            ]
         data_type = input("Is your data LIB or HIB?: ")
         return title, headers, data, data_type
 
@@ -248,8 +235,10 @@ def compose(*functions):
     Returns:
         the composed function.
     """
+
     def compose2(f, g):
         return lambda x: f(g(x))
+
     return functools.reduce(compose2, functions, lambda x: x)
 
 
@@ -307,16 +296,24 @@ def valid_demo(ctx, param, value):
 
 
 @click.command()
-@click.option('--demo', default=None, callback=valid_demo,
-              help='selects a demo accepts "p" or "t"')
-@click.option('--load', default=None, callback=valid_file,
-              help='loads the specified json or py file')
-@click.option('--new', default=None,
-              help='creates a new data set with the provided title')
-@click.option('--output', default=None,
-              help='saves output to the specified file')
-def cli(demo: Optional[str], load: Optional[str],
-        new: Optional[str], output: Optional[str]):
+@click.option(
+    '--demo',
+    default=None,
+    callback=valid_demo,
+    help='selects a demo accepts "p" or "t"')
+@click.option(
+    '--load',
+    default=None,
+    callback=valid_file,
+    help='loads the specified json or py file')
+@click.option(
+    '--new',
+    default=None,
+    help='creates a new data set with the provided title')
+@click.option(
+    '--output', default=None, help='saves output to the specified file')
+def cli(demo: Optional[str], load: Optional[str], new: Optional[str],
+        output: Optional[str]):
     """Click application
 
     Args:
