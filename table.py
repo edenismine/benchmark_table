@@ -115,7 +115,7 @@ class BenchmarkTable:
             writer(f"| {k} {('| %.2f ' * len(v)) % tuple(v)} |")
 
     def compared_to(self, ref_machine: str) -> Dict[str, List[float]]:
-        """Returns a normalized version of :data:`self.data` with respect to a
+        """Returns a normalized version of `self.data` with respect to a
         given machine
 
         Args:
