@@ -40,7 +40,6 @@ class BenchmarkTable:
         headers: The column headers of the table.
         data: The benchmarking data.
         type: The data set type, either LIB or HIB.
-
     """
 
     def __init__(self,
@@ -134,7 +133,6 @@ class BenchmarkTable:
 
         Args:
             output: Optional output file.
-
         """
         # Set output to either stdout or the output file if there is one
         writer = compose(output.write, lambda s: s + "\n") if output else print
@@ -247,7 +245,6 @@ def error(message: str):
 
     Args:
         message: A descriptive message that explains the error.
-
     """
     print(message)
     exit(1)
