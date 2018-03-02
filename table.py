@@ -224,6 +224,23 @@ class BenchmarkTable:
             error(f"Invalid data type {data_type}. Must be either LIB or HIB")
 
 
+def create_pdf(f_name: str):
+    """Creates a pdf from the specified file using pandoc.
+
+    Args:
+        f_name: The file that should be converted using pandoc.
+    """
+    import subprocess
+
+    pandoc = which("pandoc")
+    if pandoc:
+        name, _ = f_name.split('.', 1)
+        pdf = f"pandoc {f_name} -o {name}.pdf"
+        subprocess.call(pdf.split(' '))
+    else:
+        error("pandoc is not installed, unable to create pdf")
+
+
 def compose(*functions):
     """Function composition
 
@@ -292,6 +309,33 @@ def valid_demo(ctx, param, value):
     return value
 
 
+def which(program):
+    """Looks for an executable and returns its path.
+
+    Args:
+        program: the program's name
+
+    Returns:
+        The program's path or None if it doesn't find it.
+    """
+    import os
+
+    def is_exe(a_file_path):
+        return os.path.isfile(a_file_path) and os.access(a_file_path, os.X_OK)
+
+    file_path, file_name = os.path.split(program)
+    if file_path:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
+
+
 @click.command()
 @click.option(
     '--demo',
@@ -330,8 +374,14 @@ def cli(demo: Optional[str], load: Optional[str], new: Optional[str],
     """
     benchmark = BenchmarkTable(demo, load, new)
     if output:
-        with open(output, 'w') as output_file:
-            benchmark.print_markdown(output_file)
+        if output.endswith(".pdf"):
+            output = output[:-3] + "md"
+            with open(output, 'w') as output_file:
+                benchmark.print_markdown(output_file)
+            create_pdf(output)
+        else:
+            with open(output, 'w') as output_file:
+                benchmark.print_markdown(output_file)
     else:
         benchmark.print_markdown()
 
