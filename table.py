@@ -74,8 +74,12 @@ class BenchmarkTable:
                 with open(input_file) as data:
                     data_set = tuple(json.load(data))
             elif extension == "py":
-                with open(input_file) as data:
-                    data_set = ast.literal_eval(data.read())
+                try:
+                    with open(input_file) as data:
+                        data_set = ast.literal_eval(data.read())
+                except FileNotFoundError:
+                    click.echo(f"File {input_file} not found. Aborting.")
+                    quit()
         elif new:
             data_set = BenchmarkTable.new_data_set(new)
         else:
@@ -323,7 +327,7 @@ def which(program):
     def is_exe(a_file_path):
         return os.path.isfile(a_file_path) and os.access(a_file_path, os.X_OK)
 
-    file_path, file_name = os.path.split(program)
+    file_path, _ = os.path.split(program)
     if file_path:
         if is_exe(program):
             return program
@@ -355,23 +359,13 @@ def which(program):
     '--output', default=None, help='saves output to the specified file')
 def cli(demo: Optional[str], load: Optional[str], new: Optional[str],
         output: Optional[str]):
-    """Click application
+    """Benchamark table generator
 
-    Args:
-        demo:
-            What the user passed with the --demo flag. Used for selecting a
-            demo accepts "p" or "t".
-        load:
-            What the user passed with the --load flag. Used to specify if a
-            python or json file should be loaded.
-        new:
-            What the user passed with the --new flag. Used to specify if the
-            user wants to a new table, this parameter would then be this new
-            data set's title.
-        output:
-            What the user passed with the --output flag. Used to specify if
-            and to which file the output should be saved.
+    This script takes a set of benchmarks, calculates their normalized versions
+    relative to each computer in the dataset and produces a markdown table
+    which can be redirected to a file. It can produce pdf output as well.
     """
+
     benchmark = BenchmarkTable(demo, load, new)
     if output:
         if output.endswith(".pdf"):
@@ -387,4 +381,5 @@ def cli(demo: Optional[str], load: Optional[str], new: Optional[str],
 
 
 if __name__ == '__main__':
+    # pylint: disable=E1120
     cli()
